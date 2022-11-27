@@ -12,8 +12,7 @@
     "require": {
         "php": "^7.1|^8",
         "ext-pdo": "*",
-        "nyholm/dsn": "^2.0",
-        "symfony/polyfill-php73": "^1.22"
+        "dottwatson/php-mysql-engine":"@dev"
     },
     "autoload": {
         "psr-4": {
