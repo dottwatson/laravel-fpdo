@@ -1,0 +1,30 @@
+{
+    "name": "dottwatson/laravel-fpdo",
+    "description": "A MySQL engine written in PHP for interct wwith Flat Files",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mirko Temperini",
+            "email": "mirko.temperini@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.1|^8",
+        "ext-pdo": "*",
+        "nyholm/dsn": "^2.0",
+        "symfony/polyfill-php73": "^1.22"
+    },
+    "autoload": {
+        "psr-4": {
+            "Fpdo\\": "src"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Fpdo\\FpdoServiceProvider"
+            ]
+        }
+    }
+}
