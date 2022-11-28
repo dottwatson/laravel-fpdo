@@ -14,12 +14,6 @@
         "ext-pdo": "*",
         "dottwatson/php-mysql-engine":"dev-master"
     },
-    "repositories":[ 
-        { 
-            "type": "vcs", 
-            "url": "git@github.com:dottwatson/php-mysql-engine" 
-        } 
-    ],
     "autoload": {
         "psr-4": {
             "Fpdo\\": "src"
