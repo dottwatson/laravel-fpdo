@@ -199,7 +199,9 @@ class XmlReader extends DataReader{
                     if (!is_array($output)) {
                         $output = ['nodeValue' => $output];
                     }
-                    $output['nodeAttributes'] = $attributes;
+                    
+                    $nodeAttributesName = config('fpdo.xml_attributes','nodeAttributes');
+                    $output[$nodeAttributesName] = $attributes;
                 }
                 break;
         }

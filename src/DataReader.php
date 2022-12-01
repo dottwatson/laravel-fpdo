@@ -278,40 +278,45 @@ abstract class DataReader{
         $cnt = 1;
         foreach($tableColumns as $originalName=>$endName){
             if(is_int($endName) || is_float($endName) || $endName == ''){
-                $tableColumns[$originalName] = 'column'.$cnt;
+                $tableColumns[$originalName] = config('fpdo.default_column','column').$cnt;
             }
 
             $cnt++;
         }
 
         //now we match the schema, if any
-        $tableColumnsKeys   = array_keys($tableColumns);
-        $schemaColumns      = [];
-        foreach($this->config('schema',[]) as $schemaColName => $schemaColDef){
-            if(is_int($schemaColName) && is_null($schemaColDef)){
-                $schemaColumns[] = null;
+        if($this->config('schema')){
+
+            $tableColumnsKeys   = array_keys($tableColumns);
+            $schemaColumns      = [];
+            foreach($this->config('schema',[]) as $schemaColName => $schemaColDef){
+                if(is_int($schemaColName) && is_null($schemaColDef)){
+                    $schemaColumns[] = null;
+                }
+                else{
+                    $schemaColumns[] = [$schemaColName,$schemaColDef];
+                }
             }
-            else{
-                $schemaColumns[] = [$schemaColName,$schemaColDef];
+    
+            foreach($schemaColumns as $pos=>$schemaColInfo){
+                if(!is_null($schemaColInfo)){
+                    if(isset($tableColumnsKeys[$pos])){
+                        $tableColumns[ $tableColumnsKeys[$pos] ] = $schemaColInfo[0];
+                    }
+                    else{
+                        $tableColumnsKeys[]                 = $schemaColInfo[0];
+                        $tableColumns[$schemaColInfo[0]]    = $schemaColInfo[0];
+                    }
+                }
             }
         }
 
-        foreach($schemaColumns as $pos=>$schemaColInfo){
-            if(!is_null($schemaColInfo)){
-                if(isset($tableColumnsKeys[$pos])){
-                    $tableColumns[ $tableColumnsKeys[$pos] ] = $schemaColInfo[0];
-                }
-                else{
-                    $tableColumnsKeys[]                 = $schemaColInfo[0];
-                    $tableColumns[$schemaColInfo[0]]    = $schemaColInfo[0];
-                }
-            }
-        }
 
         //now adapt data to the new table columns data
         foreach($this->data as $k=>$row){
             $this->data[$k] = $this->adaptDataRowToTableColumns($tableColumns,$row);
         }
+        
 
         $this->columns = $tableColumns;
     }
@@ -322,40 +327,26 @@ abstract class DataReader{
         return $this->columns;
     }
     
+    /**
+     * make data compliant with columns
+     *
+     * @param array $tableColumns
+     * @param array $row
+     * @return array
+     */
     protected function adaptDataRowToTableColumns(array $tableColumns,array $row){
         $tmp = [];
         foreach($tableColumns as $originalName => $column){
+            $originalName = (is_int($originalName))
+                ?$column
+                :$originalName;
+
+
             $tmp[$column] = $row[$originalName] ?? null;
         }
 
         return $tmp;
     }
-
-    
-
-
-    // public function buldTableData()
-    // {
-    //     $tableColumns = [];
-    //     foreach($this->data as $row){
-    //         $columns    = array_keys($row);
-    //         $newColumns = array_diff($columns,$tableColumns);
-    //         if($newColumns){
-    //             foreach($newColumns as $newColumn){
-    //                 $tableColumns[] = $newColumn;
-    //             }
-    //         }
-    //     }
-
-    //     //change column names from int to column<INT>
-    //     $cnt = 1;
-    //     foreach($tableColumns as $i=>$tableColumn){
-    //         if(is_int($i) || is_float($i) || $tableColumn == ''){
-    //             $tableColumns[$i] = 'column'.($i+1);
-    //         }
-    //     }
-
-    // }
 }
 
 ?>

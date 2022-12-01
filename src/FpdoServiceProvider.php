@@ -15,6 +15,9 @@ class FpdoServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->publishes([
+            __DIR__.'/config/fpdo.php' => config_path('fpdo.php'),
+        ]);        
     }
 
     /**
@@ -40,10 +43,10 @@ class FpdoServiceProvider extends ServiceProvider
             $prefix = Arr::get( $config,'prefix','');
 
             //This is the default character set for the database collation
-            $charset            = Arr::get($config,'charset','utf8');
+            $charset            = Arr::get($config,'charset',config('fpdo.default_charset','utf8'));
             $connectinOptions   = Arr::get($config,'options',[]);
 
-            //due to its nature, the databasec redentials are not necessaire.
+            //due to its nature, the databasec credentials are not necessaire.
             //So we create fake username and password to accomplish PDO 
             $username   = Str::random(8);
             $password   = Str::random(8);
