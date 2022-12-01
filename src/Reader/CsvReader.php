@@ -40,7 +40,7 @@ class CsvReader extends DataReader{
         $headers        = [];
         $rows           = [];
 
-        while (($dataRow = fgetcsv($handle, 1000,$this->options('delimiter'),$this->options('enclosure'))) !== FALSE) {
+        while (($dataRow = fgetcsv($handle, 1000,$this->options('delimiter'),$this->options('enclosure'))) !== false) {
             if($cnt == 0){
                 if($this->options('use_header')){
                     $headers = $dataRow;

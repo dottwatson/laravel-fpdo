@@ -311,7 +311,6 @@ abstract class DataReader{
             }
         }
 
-
         //now adapt data to the new table columns data
         foreach($this->data as $k=>$row){
             $this->data[$k] = $this->adaptDataRowToTableColumns($tableColumns,$row);
@@ -337,12 +336,7 @@ abstract class DataReader{
     protected function adaptDataRowToTableColumns(array $tableColumns,array $row){
         $tmp = [];
         foreach($tableColumns as $originalName => $column){
-            $originalName = (is_int($originalName))
-                ?$column
-                :$originalName;
-
-
-            $tmp[$column] = $row[$originalName] ?? null;
+            $tmp[$column] = $row[$originalName] ?? $row[$column] ?? null;
         }
 
         return $tmp;
