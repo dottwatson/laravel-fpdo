@@ -132,7 +132,6 @@ class Server extends FakeServer{
     {
        
         if (!isset($this->databases[$database_name][$table_name])) {
-            // dump('la tabella non esiste');
             $this->databases[$database_name][$table_name] = new TableData($this,$database_name,$table_name);
         }
 

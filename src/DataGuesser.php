@@ -76,8 +76,6 @@ class DataGuesser{
             return ['type'=>'string','length'=>1000];
         }
 
-        // dump($values);
-        
         $maxLengths = [];
         $types = array_map(function($item) use(&$maxLengths){
             $matchedType                = DataGuesser::getValueType($item);
@@ -89,7 +87,6 @@ class DataGuesser{
         $occurrences = array_count_values($types);
 
         arsort($occurrences,SORT_NUMERIC);
-        // dump($occurrences);
 
         $allAvailableTypes  = array_keys($occurrences);
         $isNullable         = in_array('null',$allAvailableTypes);
@@ -179,7 +176,6 @@ class DataGuesser{
         }
         else{
             $typeCheck  = static::guessSqlType($values);
-            // dump($typeCheck);
             $length     = $typeCheck['length'];
             $type       = $typeCheck['type'];
             $sqlNull    = ($typeCheck['nullable'])?'':'NOT NULL';
@@ -227,8 +223,6 @@ class DataGuesser{
             break;
         }
         
-        // dump([$type,$sqlType]);
-
         $columnDefinition =[
             $sqlType,
             $sqlNull,
