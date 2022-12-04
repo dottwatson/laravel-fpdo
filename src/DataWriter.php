@@ -3,6 +3,7 @@ namespace Fpdo;
 use Illuminate\Support\Arr;
 use Fpdo\Exceptions\DataWriterException;
 use Exception;
+use Fpdo\FpdoLog;
 
 abstract class DataWriter{
 
@@ -225,26 +226,23 @@ abstract class DataWriter{
 
     public function write()
     {
-        $destination = $this->destination; 
-        $data        = $this->process();
+        $destination = $this->destination;
 
-        // dd($destination);
+        $start = microtime(true);
+
+        $data  = $this->process();
 
         if(is_callable($destination)){
-            return  call_user_func($destination,$data);
+            $writeResult = call_user_func($destination,$data);
         }
         elseif(is_resource($destination) && get_resource_type($destination) == 'stream'){
             return fwrite($destination,$data);
         }
-        // elseif(is_object($destination) && is_a($destination,'SimpleXMLElement',false)){
-
-        //     return $destination->asXML();
-        // }
         elseif(is_object($destination)){
             try{
-                $destination->data =  $data;
+                $destination->{$this->table} =  $data;
 
-                return $destination;
+                $writeResult = $destination;
             }
             catch(Exception $e){
                 $message = $e->getMessage();
@@ -254,7 +252,7 @@ abstract class DataWriter{
         elseif(is_scalar($destination)){
             if(!is_file($destination) || (is_file($destination) && is_readable($destination))){
                 try{
-                    return file_put_contents($destination,(string)$data);
+                    $writeResult = file_put_contents($destination,(string)$data);
                 }
                 catch(Exception $e){
                     $message = $e->getMessage();
@@ -278,11 +276,11 @@ abstract class DataWriter{
                             ]
                         ]);
 
-                        return file_get_contents($destination, false, $context);
+                        $writeResult = file_get_contents($destination, false, $context);
                     break;
                     case 'ftp':
                     case 'sftp':
-                        return file_put_contents(
+                        $writeResult = file_put_contents(
                             $destination,
                             (string)$data,
                             false,
@@ -302,7 +300,14 @@ abstract class DataWriter{
             }
         }
         elseif(is_array($destination)){
-            return $this->data;
+            $writeResult = $this->data;
         }
+
+        $duration = microtime(true) - $start;
+        if(config('fpdo.log.enabled') && config('fpdo.log.writer.enabled') && $duration >= config('fpdo.log.writer.max_execution_time')){
+            FpdoLog::writer($duration,"{$this->database}.{$this->table}");
+        }
+
+        return $writeResult;
     }
 }

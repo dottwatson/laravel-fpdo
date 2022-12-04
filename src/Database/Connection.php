@@ -42,18 +42,7 @@ class Connection extends BaseConnection{
         $this->useDefaultPostProcessor();
     }
 
-    // public function close()
-    // {
-    //     $databases = $this->getPdo()->getServer()->databases;
-    //     foreach($databases as $database=>$tables){
-    //         foreach($tables as $table=>$tableInfo){
-    //             $parser = TableData::resolveReader($database,$table,DataReader::WRITE_MODE);
-    //             $parser->save($tableInfo->table);
-    //         }
-    //     }
-    // }
-
-    
+   
     public function createDatabase(string $database,array $config = [])
     {
         if(config("database.connections.{$database}")){
@@ -106,6 +95,17 @@ class Connection extends BaseConnection{
 
 
     /**
+     * returns current pdo
+     *
+     * @return \Fpdo\Php7\Fpdo|\Fpdo\Php8\Fpdo
+     */
+    public function getPdo()
+    {
+        return $this->pdo;
+    }
+
+
+    /**
      * Dump the database or a pair [tabelName=>dumpcConfig] list o f tables
      * Format of dumpConfig:
      * [
@@ -154,6 +154,7 @@ class Connection extends BaseConnection{
         return $dump;
     }
 
+    
     protected function dumpTable($table,array $dumpConfig = [])
     {
         $server = $this->pdo->getServer();
@@ -203,7 +204,6 @@ class Connection extends BaseConnection{
             $values = [];
 
 
-            // dd($this->table($table)->select('*')->get());
             foreach( $this->table($table)->select('*')->cursor() as $row ){
                 $dataRow = get_object_vars($row);
                 foreach($dataRow as $k=>$value){
@@ -227,6 +227,16 @@ class Connection extends BaseConnection{
         $tableDump[] = "\n-- -------------------------------------------------------- End of dump table {$table}\n\n\n\n";
 
         return implode(";\n\n",$tableDump);
+    }
+
+
+    public function save($tables = null)
+    {
+        $pdo = $this->pdo;
+        $server = $pdo->getServer();
+        $server->saveOutputTable($pdo,$tables);       
+        
+        // $this->pdo->getServer()->saveOutputTable($this->pdo,)        
     }
 
 }

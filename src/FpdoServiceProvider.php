@@ -36,6 +36,10 @@ class FpdoServiceProvider extends ServiceProvider
             }
         }
 
+        $this->mergeConfigFrom(
+            __DIR__.'/config/fpdo.php','fpdo'
+       );        
+
         //register the driver into the system, so it will be available globally
         Connection::resolverFor('fpdo',function($connection, $database, $prefix, $config){
            

@@ -2,6 +2,7 @@
 namespace Fpdo;
 
 use Vimeo\MysqlEngine\FakePdoStatementTrait;
+use Fpdo\FpdoLog;
 
 trait FpdoStatementTrait
 {
@@ -16,8 +17,13 @@ trait FpdoStatementTrait
     {
         $start = microtime(true);
         $result = $this->parentUniversalExecute($params);
-        
-        FakePdoLogger::log($this,$this->sql,$this->boundValues,$this->affectedRows,$start, microtime(true));
+
+        $duration = microtime(true) - $start;
+        if(config('fpdo.log.enabled') && config('fpdo.log.query.enabled') && $duration >= config('fpdo.log.query.max_execution_time')){
+            $addSlashes = str_replace(['?', '%'], ["'?'", '%%'],$this->sql);
+            $fullSql =  vsprintf(str_replace('?', '%s', $addSlashes), $this->boundValues);
+            FpdoLog::query($duration,$fullSql);
+        }
 
         return $result;
     }

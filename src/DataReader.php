@@ -1,9 +1,8 @@
 <?php 
 namespace Fpdo;
 
-use Fpdo\DataManager;
+use Fpdo\FpdoLog;
 use Fpdo\Exceptions\DataReaderException;
-use Exception;
 use Illuminate\Support\Arr;
 
 abstract class DataReader{
@@ -101,9 +100,16 @@ abstract class DataReader{
     {
         $this->init($database,$table,$tableDefinition);
 
+        $start = microtime(true);
+        
         $this->process();
-
+        
         $this->defineTableDataAndColumns();
+
+        $duration = microtime(true) - $start;
+        if(config('fpdo.log.enabled') && config('fpdo.log.reader.enabled') && $duration >= config('fpdo.log.reader.max_execution_time')){
+            FpdoLog::reader($duration,"{$database}.{$table}");
+        }
     }
     
     /**
