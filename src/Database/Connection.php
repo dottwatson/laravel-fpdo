@@ -40,9 +40,32 @@ class Connection extends BaseConnection{
         $this->useDefaultQueryGrammar();
 
         $this->useDefaultPostProcessor();
+
+
+        $this->iniTableSchema();
     }
 
-   
+    
+    protected function initTableSchema()
+    {
+        $key ="database.connections.{$this->database}"; 
+        if(config("{$key}.use_information_schema")){
+            $basePath = config("{$key}.use_information_schema",storage_path("fpdo"));
+            if(!is_dir("{$basePath}/information_schema")){
+                mkdir("{$basePath}/information_schema",0775,true);
+            }
+
+            if(!is_dir("{$basePath}/{$this->database}")){
+                mkdir("{$basePath}/{$this->database}",0775,true);
+            }
+        }
+
+        //carico information schema
+        //carico le tabelle
+        // @todo: creare il reader e writer in crypt/descrypt di laravel
+    }
+
+
     public function createDatabase(string $database,array $config = [])
     {
         if(config("database.connections.{$database}")){

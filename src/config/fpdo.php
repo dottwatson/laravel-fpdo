@@ -69,7 +69,7 @@ return [
          */
         'query' => [
             'enabled' => true,
-            'max_execution_time' => 20 // milliseconds
+            'max_execution_time' => -1 // milliseconds
         ],   
         /**
          * activating read logs, each resource reading and parsing will be logged, according to its max_execution_time value
