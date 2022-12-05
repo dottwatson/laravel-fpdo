@@ -42,7 +42,7 @@ class Connection extends BaseConnection{
         $this->useDefaultPostProcessor();
 
 
-        $this->iniTableSchema();
+        $this->initTableSchema();
     }
 
     
@@ -60,6 +60,36 @@ class Connection extends BaseConnection{
             }
         }
 
+        if(!config('database.connections.information_schema')){
+            config(['database.connections.information_schema' =>[
+                    'driver' => 'fpdo',
+                    'charset' => 'utf8mb4',
+                    'prefix' => '',
+                    'prefix_indexes' => true,
+                    'tables' => [
+                        'columns' => [
+                            'input' => [
+                                'type'      => 'csv',
+                                'source'    => "{$basePath}/{$this->database}/columns.csv",
+                                'options'   => [
+                                    'use_header' => true,
+                                ],
+                            ],
+                            'output' => [
+                                'type'      => 'csv',
+                                'source'    => "{$basePath}/{$this->database}/columns.csv",
+                                'options'   => [
+                                    'use_header' => true,
+                                ],
+                            ],
+                            'schema' => [
+                                
+                            ]
+                        ]
+                    ]
+                ]
+            ]);
+        }
         //carico information schema
         //carico le tabelle
         // @todo: creare il reader e writer in crypt/descrypt di laravel
