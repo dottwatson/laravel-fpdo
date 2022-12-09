@@ -7,7 +7,14 @@ return [
     'default_charset' => 'utf8mb4',
 
     /**
-     * when  resource is evalutated, the ssystem tries to guess the columns types by examinating the data.
+     * also define the defaut database charset,
+     * if not defined into database declaration in database config
+     */
+    'default_database_charset' => 'utf8mb4',
+
+
+    /**
+     * when  resource is evalutated, the system tries to guess the columns types by examinating the data.
      * It happens only when non schema is set for the source. This can be changed here.
      * 
      * If true, the data will be parsed and the system tries to detect the data type, creating the table columns according to.
@@ -16,7 +23,7 @@ return [
      * Note that if there isn't data to parse, the column will have TEXT as type and is nullable
      * 
      * If enabled it will spend time to works, but the data will be set correctly according with its type.
-     * More data to check meand more accuracy for column type detection
+     * More data to check means more accuracy for column type detection, and more time to comsume
      */
     'guess_datatype' => true,
 
@@ -24,8 +31,10 @@ return [
      * When the systems has not the ability to set a column name (e.g. a csv without header and no schema defined for table)
      * It creates table columns with an arbitrary name. 
      * By default the column name is `column<n>` , where n is the colun position in dataset.
+     * Also, if is the case where the data count if more than columns count, new columns are added automatilcally
+     * using this column name
      * 
-     * the logic can not be altered, except the prefix on column name, tha is `column`
+     * the logic can not be altered, except the prefix on column name, that is `column`
      * 
      * setting this value as 'myColumn', the not devined column name in dataset will be `myColumn<n>'
      */
@@ -41,7 +50,7 @@ return [
 
     /**
      * Using \FpdoFpdo::dump you can choise how many insert rows will be used
-     * on a single inssert statement
+     * on a single insert statement
      */
     'dump'=>[
         'insert_limit'=>5
@@ -59,11 +68,12 @@ return [
          * [YYY-MM-DD HH:II:SS] local.INFO write <database.table taken <time> to be wrote.
          */
         'enabled' => true,
+
         // the file where logs will be stored
         'file' => storage_path('logs/fpdo.log'),
 
         /**
-         * activating query logs, each query will be executed will be logged, according to its max_execution_time value
+         * activating query logs, each query be executed will be logged, according to its max_execution_time value
          * it means that if you want to log all queries longer then 1 sec, the max_execution_time should be 1000
          * to log ALL queries simply set it to -1
          */

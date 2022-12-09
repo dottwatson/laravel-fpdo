@@ -195,13 +195,13 @@ class TableData extends FakeTableData{
         {
             $customDefinition = $dataReader->config("schema.{$column}",[]); 
             $values = array_column($dataReader->getData(),$column);
-            $columnDefinition = DataGuesser::makeSQlColumn($pdoInstance,$values,$customDefinition);
+            $columnDefinition = DataGuesser::makeSQlColumn($pdoInstance,$column,$values,$customDefinition);
             
-            $sqlColumns[] = "{$column} {$columnDefinition}";
+            $sqlColumns[] = "{$columnDefinition['column']} {$columnDefinition['sql']}";//"{$column} {$columnDefinition}";
         }
 
         $sql = "CREATE TABLE {$table} (\n".implode(",\n",$sqlColumns)." \n) CHARACTER SET {$tableCharset}";
-
+        dd($sql);
         return $sql;
     }
 }

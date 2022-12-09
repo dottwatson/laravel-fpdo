@@ -73,7 +73,7 @@ class DataGuesser{
      */
     public static function guessSqlType(array $values = []){
         if(!$values){
-            return ['type'=>'string','length'=>1000];
+            return ['type'=>'text','length'=>-1];
         }
 
         $maxLengths = [];
@@ -101,7 +101,7 @@ class DataGuesser{
         $maxLength = 0;
         //string ever win on all
         if(in_array('string',$allAvailableTypes)){
-            $resultType = 'string';
+            $resultType = 'text';
             $maxLength  = $maxLengths['string'] ?? 1000;
         }
         //if is integer and float then is float
@@ -116,7 +116,7 @@ class DataGuesser{
                 $resultType = 'json';
             }
             elseif($resultType == 'undefined' || $resultType == 'null'){
-                $resultType = 'string';
+                $resultType = 'text';
                 $maxLength  = $maxLengths['string'] ?? 1000;
             }
             elseif($resultType == 'integer'){
@@ -128,7 +128,7 @@ class DataGuesser{
     }
 
 
-    public static function makeSQlColumn(PDO $pdoInstance, array $values = [],array $customDefinition = [])
+    public static function makeSQlColumn(PDO $pdoInstance,string $columnName = null, array $values = [],array $customDefinition = [])
     {
 
         if(config('fpdo.guess_datatype',true) == false){
@@ -136,11 +136,11 @@ class DataGuesser{
         }
         
         //define nullable column
-        $nullable = (isset($customDefinition['null']))
-            ?(bool)$customDefinition['null']
+        $nullable = (isset($customDefinition['nullable']))
+            ?(bool)$customDefinition['nullable']
             :(in_array(null,$values));
 
-        $sqlNull = ($nullable)?'':'NOT NULL';
+        $sqlNull = ($nullable)?'NULL':'NOT NULL';
 
 
         //define autoincrement
@@ -163,23 +163,12 @@ class DataGuesser{
             ?'DEFAULT '.$pdoInstance->quote($customDefinition['default'])
             :'';
 
-        if(isset($customDefinition['type'])){
-            $tmpType = $customDefinition['type'];
-            if(is_array($tmpType)){
-                $type   = (string)$tmpType[0];
-                $length = $tmpType[1] ?? null;
-            }
-            else{
-                $type = (string)$customDefinition['type'];
-                $length = null;
-            }
-        }
-        else{
-            $typeCheck  = static::guessSqlType($values);
-            $length     = $typeCheck['length'];
-            $type       = $typeCheck['type'];
-            $sqlNull    = ($typeCheck['nullable'])?'':'NOT NULL';
-        }
+
+
+        $typeCheck  = static::guessSqlType($values);
+        $length     = $typeCheck['length'];
+        $type       = $typeCheck['type'];
+        $sqlNull    = ($typeCheck['nullable'])?'NULL':'NOT NULL';
 
         $sqlType = '';
         switch($type){
@@ -211,15 +200,22 @@ class DataGuesser{
             case 'json':
                 $sqlType = 'JSON';
             break;
-            default:
-                $length = ((int)$length < 255)?255:(int)$length;
+            case 'text':
+                if(config('fpdo.guess_datatype') == true){
+                    $length = ($length <=255) ?255:$length;
+                }
+
                 if($length > 255){
                     $sqlType = 'TEXT';
                 }
                 else{
                     $sqlType = 'VARCHAR('.$length.')';
                 }
-
+            break;
+            default:
+                $sqlType = 'TEXT';
+                $sqlNull = 'NULL';
+                $sqlDefault = '';
             break;
         }
         
@@ -238,7 +234,7 @@ class DataGuesser{
             }
         }
 
-        return trim(implode(' ',$columnDefinition));
+        return ['column' => $columnName,'sql'=>trim(implode(' ',$columnDefinition)),'structure' => $columnDefinition];
     }
 
     /**

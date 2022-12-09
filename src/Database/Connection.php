@@ -2,14 +2,34 @@
 
 namespace Fpdo\Database;
 
-use Fpdo\DataReader;
 use Fpdo\Exceptions\FpdoException;
 use Illuminate\Database\MySqlConnection as BaseConnection;
 
-use Fpdo\TableData;
-use Illuminate\Support\LazyCollection;
-
 class Connection extends BaseConnection{
+
+    /**
+     * The Fpdo
+     *
+     * @var \Fpdo\Php7\Fpdo|\Fpdo\Php8\Fpdo
+     */
+    protected $pdo;
+
+    protected $tableSchemaFiles = [
+        'columns' => [
+            'TABLE_SCHEMA' => ['type'=>'text','length'=>64],
+            'TABLE_NAME' => ['type'=>'text','length'=>64],
+            'COLUMN_NAME' => ['type'=>'text','length'=>64],
+            'ORDINAL_POSITION' => ['type'=>'integer','length'=>21],
+            'COLUMN_DEFAULT' => ['type'=>'text'],
+            'IS_NULLABLE' => ['type'=>'text','length'=>3],
+            'DATA_TYPE' => ['type'=>'text','length'=>64],
+            'CHARACTER_MAXIMUM_LENGTH' => [['type'=>'integer','length'=>21]],
+            'CHARACTER_SET_NAME' => ['type'=>'text','length'=>32],
+            'COLLATION_NAME' => ['type'=>'text','length'=>32],
+            'COLUMN_TYPE' => ['type'=>'text'],
+            'EXTRA' => ['type'=>'text','length'=>30],
+        ]
+    ];
 
 
     /**
@@ -53,46 +73,49 @@ class Connection extends BaseConnection{
             $basePath = config("{$key}.use_information_schema",storage_path("fpdo"));
             if(!is_dir("{$basePath}/information_schema")){
                 mkdir("{$basePath}/information_schema",0775,true);
+                
+                if(!is_file("{$basePath}/information_schema")){}
             }
 
             if(!is_dir("{$basePath}/{$this->database}")){
                 mkdir("{$basePath}/{$this->database}",0775,true);
             }
-        }
 
-        if(!config('database.connections.information_schema')){
-            config(['database.connections.information_schema' =>[
-                    'driver' => 'fpdo',
-                    'charset' => 'utf8mb4',
-                    'prefix' => '',
-                    'prefix_indexes' => true,
-                    'tables' => [
-                        'columns' => [
-                            'input' => [
-                                'type'      => 'csv',
-                                'source'    => "{$basePath}/{$this->database}/columns.csv",
-                                'options'   => [
-                                    'use_header' => true,
+            if(!config('database.connections.information_schema')){
+                config(['database.connections.information_schema' =>[
+                        'driver' => 'fpdo',
+                        'charset' => 'utf8mb4',
+                        'prefix' => '',
+                        'prefix_indexes' => true,
+                        'tables' => [
+                            'columns' => [
+                                'input' => [
+                                    'type'      => 'csv',
+                                    'source'    => "{$basePath}/{$this->database}/columns.csv",
+                                    'options'   => [
+                                        'use_header' => true,
+                                    ],
                                 ],
-                            ],
-                            'output' => [
-                                'type'      => 'csv',
-                                'source'    => "{$basePath}/{$this->database}/columns.csv",
-                                'options'   => [
-                                    'use_header' => true,
+                                'output' => [
+                                    'type'      => 'csv',
+                                    'source'    => "{$basePath}/{$this->database}/columns.csv",
+                                    'options'   => [
+                                        'use_header' => true,
+                                    ],
                                 ],
-                            ],
-                            'schema' => [
-                                
+                                'schema' => [
+                                    
+                                ]
                             ]
                         ]
                     ]
-                ]
-            ]);
+                ]);
+            }
+            //carico information schema
+            //carico le tabelle
+            // @todo: creare il reader e writer in crypt/descrypt di laravel
         }
-        //carico information schema
-        //carico le tabelle
-        // @todo: creare il reader e writer in crypt/descrypt di laravel
+
     }
 
 
@@ -143,7 +166,7 @@ class Connection extends BaseConnection{
         $tables[$table] = $tableConfiguration;
         config(["database.connections.{$database}.tables"=>$tables]);
 
-        $this->getServer()->getTableDefinition($database,$table);
+        $this->pdo->getServer()->getTableDefinition($database,$table);
     }
 
 
