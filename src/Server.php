@@ -62,9 +62,10 @@ class Server extends FakeServer{
             //this allows us to 'lazyload' tables where needed. 
             //This is a benefit, because does not consume memory and time, preserving a fast and agile execution  
             if($tableDefinition){
+
                 //detect the correct parser for data
                 $parser = TableData::resolveReader($database,$table);
-                
+
                 //try to make the create query to define the table and fill it with its resource info
                 $pdoCls             = 'Fpdo\\Php'.PHP_MAJOR_VERSION.'\\Fpdo';
                 
@@ -74,9 +75,7 @@ class Server extends FakeServer{
                 
                 $queryTableCreate = TableData::getSqlCreateTable($parser,$tableDefinition['charset'],$this->pdo);
 
-
                 $this->tablesCreationQuery[$table] = $queryTableCreate;
-
                 $this->pdo->exec($queryTableCreate);
                 $this->saveTable($database,$table,$parser->getData());
             }
@@ -109,7 +108,6 @@ class Server extends FakeServer{
                 }
                 
                 $queryTableCreate = TableData::getSqlCreateTable($parser,$tableDefinition['charset'],$this->pdo);
-
                 $this->tablesCreationQuery[$table] = $queryTableCreate;
 
                 $this->pdo->exec($queryTableCreate);
@@ -130,12 +128,12 @@ class Server extends FakeServer{
      */
     public function saveTable(string $database_name, string $table_name, array $rows) : void
     {
-       
         if (!isset($this->databases[$database_name][$table_name])) {
             $this->databases[$database_name][$table_name] = new TableData($this,$database_name,$table_name);
         }
 
         $schema = $this->tableDefinitions[$database_name][$table_name];
+
 
         $pdo = $this->pdo;
 

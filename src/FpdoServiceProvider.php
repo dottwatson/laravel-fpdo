@@ -39,7 +39,6 @@ class FpdoServiceProvider extends ServiceProvider
         
         //register the driver into the system, so it will be available globally
         Connection::resolverFor('fpdo',function($connection, $database, $prefix, $config){
-            
             $dbname = Arr::get($config,'database');
             $prefix = Arr::get( $config,'prefix','');
             
@@ -55,7 +54,7 @@ class FpdoServiceProvider extends ServiceProvider
             $dsn        = "fpdo:host=127.0.0.1;dbname={$dbname};";
             $pdoCls     = 'Fpdo\\Php'.PHP_MAJOR_VERSION.'\\Fpdo';
             
-            $instance = new $pdoCls($dsn,$username,$password);
+            $instance = new $pdoCls($dsn,$username,$password,[],$config['name']);
             
             foreach($connectinOptions as $optName=>$optVal){
                 $instance->setAttribute($optName,$optVal);

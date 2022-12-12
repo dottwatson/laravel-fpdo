@@ -88,6 +88,13 @@ abstract class DataReader{
      */
     protected static $bindedParsers = [];
 
+    /**
+     * the table.schema config parameter
+     *
+     * @var array|null
+     */
+    protected $declaredSchema;
+
    
     /**
      * constructor
@@ -96,9 +103,9 @@ abstract class DataReader{
      * @param string $table
      * @param array $tableDefinition The table defonotopn in database connections config
      */
-    public function __construct(string $database, string $table,array $tableDefinition)
+    public function __construct(string $database, string $table,array $tableDefinition,array $declaredSchema = null)
     {
-        $this->init($database,$table,$tableDefinition);
+        $this->init($database,$table,$tableDefinition,$declaredSchema);
 
         $start = microtime(true);
         
@@ -120,7 +127,7 @@ abstract class DataReader{
      * @param array $tableDefinition
      * @return void
      */
-    protected function init(string $database, string $table,array $tableDefinition)
+    protected function init(string $database, string $table,array $tableDefinition,array $declaredSchema = null)
     {
         $this->database     = $database;
         $this->table        = $table;
@@ -131,6 +138,7 @@ abstract class DataReader{
 
         $options            = $this->config('options',[]);
         $this->options      = array_replace_recursive($this->options,$options);
+        $this->declaredSchema = $declaredSchema;
     }
 
 
@@ -290,12 +298,12 @@ abstract class DataReader{
             $cnt++;
         }
 
-        //now we match the schema, if any
-        if($this->config('schema')){
 
+        //now we match the schema, if any
+        if($this->declaredSchema){
             $tableColumnsKeys   = array_keys($tableColumns);
             $schemaColumns      = [];
-            foreach($this->config('schema',[]) as $schemaColName => $schemaColDef){
+            foreach($this->declaredSchema as $schemaColName => $schemaColDef){
                 if(is_int($schemaColName) && is_null($schemaColDef)){
                     $schemaColumns[] = null;
                 }

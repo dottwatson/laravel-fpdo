@@ -73,7 +73,7 @@ class DataGuesser{
      */
     public static function guessSqlType(array $values = []){
         if(!$values){
-            return ['type'=>'text','length'=>-1];
+            return ['type'=>'text','length'=>-1,'nullable'=>true];
         }
 
         $maxLengths = [];

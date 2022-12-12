@@ -100,26 +100,27 @@ class TableData extends FakeTableData{
 
         //try to read table info
         $dataType       = Arr::get($config,'type',null);
-        $parser = null;
+        $parser         = null;
+        $declaredSchema = config("database.connections.{$database}.tables.{$table}.schema");
 
         switch($dataType){
             case self::JSON_FORMAT:
-                $parser = new JsonReader($database,$table,$config);
+                $parser = new JsonReader($database,$table,$config,$declaredSchema);
             break;
             case self::CSV_FORMAT:
-                $parser = new CsvReader($database,$table,$config);
+                $parser = new CsvReader($database,$table,$config,$declaredSchema);
             break;
             case self::XML_FORMAT:
-                $parser = new XmlReader($database,$table,$config);
+                $parser = new XmlReader($database,$table,$config,$declaredSchema);
             break;
             case self::ARRAY_FORMAT:
-                $parser = new ArrayReader($database,$table,$config);
+                $parser = new ArrayReader($database,$table,$config,$declaredSchema);
             break;
             default:
                 $binded = DataReader::getRegisteredParser();
                 foreach($binded as $bindedParser=>$bindedClass){
                     if($dataType == $bindedParser){
-                        $parser = new $bindedClass($database,$table,$config);
+                        $parser = new $bindedClass($database,$table,$config,$declaredSchema);
                         break;
                     }
                 }
@@ -188,6 +189,7 @@ class TableData extends FakeTableData{
     public static function getSqlCreateTable(DataReader $dataReader,string $tableCharset = null, PDO $pdoInstance)
     {
         $table          = $dataReader->getTable();
+        $database       = $dataReader->getDatabase();
         $tableCharset   = $tableCharset ?? config('fpdo.default_charset','utf8mb4');
 
         $sqlColumns = [];
@@ -201,7 +203,6 @@ class TableData extends FakeTableData{
         }
 
         $sql = "CREATE TABLE {$table} (\n".implode(",\n",$sqlColumns)." \n) CHARACTER SET {$tableCharset}";
-        dd($sql);
         return $sql;
     }
 }

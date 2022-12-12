@@ -11,8 +11,9 @@ trait  FpdoTrait{
     }
 
 
-    public function __construct(string $dsn, string $username = '', string $passwd = '', array $options = [])
+    public function __construct(string $dsn, string $username = '', string $passwd = '', array $options = [],string $connectionName)
     {
+       
         //$this->real = new \PDO($dsn, $username, $passwd, $options);
 
         $dsn = \Nyholm\Dsn\DsnParser::parse($dsn);
@@ -26,7 +27,7 @@ trait  FpdoTrait{
         $this->strict_mode = \array_key_exists(\PDO::MYSQL_ATTR_INIT_COMMAND, $options)
             && \strpos($options[\PDO::MYSQL_ATTR_INIT_COMMAND], 'STRICT_ALL_TABLES');
 
-        $this->server = Server::getOrCreate('primary');
+        $this->server = Server::getOrCreate($connectionName);
         
         $this->server->setPdo($this);
     }
